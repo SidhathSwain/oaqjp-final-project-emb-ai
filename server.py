@@ -1,34 +1,49 @@
+"""Flask application for emotion detection."""
+
 from flask import Flask, render_template, request
 from EmotionDetection.emotion_detection import emotion_detector
 
-app=Flask("Emotion Detector")
+app = Flask(__name__)
 
-@app.route('/emotionDetector')
-def sent_detector():
 
-    #the data is analyzed
-    text_to_analyze = request.args.get('textToAnalyze')
+@app.route("/emotionDetector")
+def emotion_detector_route():
+    """
+    Analyze the emotion of the provided text and return formatted response.
+    """
+    text_to_analyze = request.args.get("textToAnalyze")
+
+    if not text_to_analyze:
+        return "Invalid text! Please try again!"
+
     response = emotion_detector(text_to_analyze)
 
-    #mood describe
-    anger=response['anger']
-    disgust=response['disgust']
-    fear=response['fear']
-    joy=response['joy']
-    sadness=response['sadness']
-    dom_emo=response['dominant_emotion']
+    anger = response.get("anger")
+    disgust = response.get("disgust")
+    fear = response.get("fear")
+    joy = response.get("joy")
+    sadness = response.get("sadness")
+    dominant_emotion = response.get("dominant_emotion")
 
-    #the statement is returned with error handling
-    if dom_emo is None:
+    if dominant_emotion is None:
         return "Invalid text! Please try again!"
-    else:
-        return "For the given statement, the system response is 'anger': {}, 'disgust': {}, 'fear': {}, 'joy': {} and 'sadness': {}. The dominant emotion is {}.".format(anger,disgust,fear,joy,sadness,dom_emo)
+
+    return (
+        "For the given statement, the system response is "
+        f"'anger': {anger}, 'disgust': {disgust}, "
+        f"'fear': {fear}, 'joy': {joy} and 'sadness': {sadness}. "
+        f"The dominant emotion is {dominant_emotion}."
+    )
 
 
-@app.route("/") 
-def render_index_page(): 
-    return render_template('index.html')
+@app.route("/")
+def render_index_page():
+    """
+    Render the main index page.
+    """
+    return render_template("index.html")
 
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5500)
+    
